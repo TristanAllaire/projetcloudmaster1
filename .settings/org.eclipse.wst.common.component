@@ -4,8 +4,12 @@
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/target\generated-sources\annotations"/>
+<<<<<<< HEAD
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/target/generated-sources/annotations"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/target/generated-test-sources/test-annotations"/>
+=======
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/target\generated-test-sources\test-annotations"/>
+>>>>>>> e2ce93ba665707d698afb87c3215deff542d8056
         <property name="java-output-path" value="/tinyPet/build/classes"/>
         <property name="context-root" value="lepetitcloud"/>
     </wb-module>
