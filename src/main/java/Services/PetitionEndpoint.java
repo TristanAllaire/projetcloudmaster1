@@ -1,4 +1,4 @@
-package lePetitCloud;
+package Services;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -14,12 +14,13 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.KeyFactory;
+
+import Entities.Petition;
+
 import com.google.appengine.api.datastore.Key;
 
-import lePetitCloud.entities.Petition;
-
 @Api(name = "petitions", version = "v1", namespace = @ApiNamespace(ownerDomain = "lepetitcloud.appspot.com", ownerName = "lepetitcloud.appspot.com", packagePath = ""))
-public class EndPoint {
+public class PetitionEndpoint {
 	@ApiMethod(httpMethod = ApiMethod.HttpMethod.POST)
 
 	public void add() throws UnauthorizedException {

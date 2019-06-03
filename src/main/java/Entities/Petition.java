@@ -1,4 +1,4 @@
-package lePetitCloud.entities;
+package Entities;
 
 import java.util.Date;
 

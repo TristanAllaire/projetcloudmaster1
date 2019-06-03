@@ -1,2 +1,4 @@
 target/
 node_modules/
+/target\generated-sources\annotations/
+/target\generated-test-sources\test-annotations/
