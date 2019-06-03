@@ -28,18 +28,18 @@ public class PetitionEndpoint {
 	@ApiMethod(name = "createPetition")
 	public Entity creerPetition(@Named("name") String name) {
 
-		Entity nouvellePetition = new Entity("Petition", ""+name);
+		Entity nouvellePetition = new Entity("Petition", "" + name);
 		nouvellePetition.setProperty("name", name);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		datastore.put(nouvellePetition);
-		
-		return  nouvellePetition;
+
+		return nouvellePetition;
 	}
 
 	@ApiMethod(name = "getPetition")
 	public List<Entity> getPetition(@Named("name") String name) {
-		
+
 		Query q = new Query("Petition").setFilter(new FilterPredicate("name", FilterOperator.EQUAL, name));
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
