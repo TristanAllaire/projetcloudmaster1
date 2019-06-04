@@ -45,12 +45,34 @@
 	  		    },
 				addAVote: function() {
 	  		        return m.request({
-	  		            method: "PUT",
+	  		            method: "POST",
 	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addAVote/"+Petition.current.name
 	  		        })
 	  		        .then(function(result) {
 	  		        	console.log("got:",result)
 	  		        	Petition.loadList()
+	  		        })
+				},
+				loadTopHundred: function(){
+	  		        return m.request({
+	  		            method: "GET",
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/entitycollection"
+	  		        })
+	  		        .then(function(result) {
+	  		        	Petition.list = result.items
+	  		        	console.log("got:",result.items)
+	  		        	m.redraw(true) // force
+	  		        })
+				},
+				loadfromcontributor: function(){
+					let encodedContributor = encodeURIComponent(Contributor.current.email);
+	  		        return m.request({
+	  		            method: "POST",
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/votedForContributor/"+encodedContributor
+	  		        })
+	  		        .then(function(result) {
+	  		        	console.log("Petitions du Contributor :",result.items)//////////TU ES RENDU LA
+	  		        	m.redraw(true) // force
 	  		        })
 				}
 	  		}
@@ -83,7 +105,13 @@
 	  		        })
 	  		        .then(function(result) {
 	  		        	console.log("got:",result)
-	  		        	Contributor.loadList()
+	  		        	return m.request({
+	  		        		method: "POST",
+		  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addAVote/"+result.properties.name
+	  		        	}).then(function(result) {
+	  		        		console.log("résultat ",result)
+	  		        		Contributor.loadList()
+	  		        	})
 	  		        })
 	  		    },
 	  		    listContributorForAPetition: function(id) {
@@ -93,7 +121,7 @@
 	  		            withCredentials: true,
 	  		    	}).then(function(result){
 	  		    		Contributor.list = result
-	  		    		console.log("Nombre de votants pour : ", id ," ",result.items.length)
+	  		    		console.log(result)
 	  		    	})	
 	  		    },
 	  	}
@@ -102,7 +130,32 @@
 	  			oninit: Petition.loadList,
 	  		    view: function() {
 	  		        return m(".user-list", Petition.list.map(function(item) {
-	  		            return m("item", [
+	  		            return m("div.item", [
+	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.name, oncreate: m.route.link
+	  		            			} ,item.properties.name + " " + item.properties.votecount)	  		            
+	  		            	])
+	  		        }))
+	  		    },
+	  			
+	  	}
+	  	
+	  	var HundredPetitionView = {
+	  			oninit: Petition.loadTopHundred,
+	  		    view: function() {
+	  		        return m(".user-list", Petition.list.map(function(item) {
+	  		            return m("div.item", [
+	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.name, oncreate: m.route.link
+	  		            			} ,item.properties.name + " " + item.properties.votecount)	  		            
+	  		            	])
+	  		        }))
+	  		    },
+	  			
+	  	}
+	  	
+	  	var ContributorPetitionView = {
+	  		    view: function() {
+	  		        return m(".user-list", Petition.list.map(function(item) {
+	  		            return m("div.item", [
 	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.name, oncreate: m.route.link
 	  		            			} ,item.properties.name + " " + item.properties.votecount)	  		            
 	  		            	])
@@ -126,6 +179,26 @@
 	  		                value: Petition.current.name
 	  		            }),
 	  		            m("button.button[type=submit]", "Save"),
+	  		        ])
+	  		    }
+	  	}
+	  	
+	  	var FormPetitionContrib = {
+	  			view: function() {
+	  		        return m("form", {
+	  		                onsubmit: function(e) {
+	  		                    e.preventDefault()
+	  		                    Petition.save()
+	  		                }
+	  		            }, [
+	  		            m("label.label", "email"),
+	  		            m("input.input[type=text][placeholder=email]", {
+	  		                oninput: function (e) {Contributor.current.email=e.target.value},
+	  		                value: Petition.current.email
+	  		            }),
+	  		            m("button.button",{onclick: function(){
+	  		            	Petition.loadfromcontributor()
+	  		            }}, "Charger")
 	  		        ])
 	  		    }
 	  	}
@@ -175,6 +248,12 @@
 	  		            m("h1", {class: "title"}, "Liste des pétitions ouvertes"),
 	  		            m("div", {id: "box"}, m(PetitionView)),
 	  		            m("div", {id: "form"}, m(Form)),
+	  		            m("button", {onclick: function(){
+  		                	m.route.set('/top');
+	  		            }}, "Accéder au top 100 des meilleurs pétitions"),
+	  		            m("button", {onclick: function(){
+  		                	m.route.set('/contributor');
+	  		            }}, "Rechercher les signatures d'un contributeur")
 	  		        ])
 	  		    }
 	  		}
@@ -190,7 +269,7 @@
 	  	var VotePage = {
 	  			oninit: function(vnode) {
 	  				Petition.load(vnode.attrs.id)
-	  				Contributor.current.name = Petition.current.name
+	  				Contributor.current.name = vnode.attrs.id
 	  			},
 	  		    view: function() {
 	  		    	return m("main", [
@@ -200,11 +279,32 @@
 	  		        ])
 	  		    }
 	  		}
+	  	
+	  	var CentPremierPage = {
+	  		    view: function() {
+	  		    	return m("main", [
+	  		            m("h1", {class: "title"}, "Liste des 100 meilleures pétitions"),
+	  		            m("div", {id: "box"}, m(HundredPetitionView)),
+	  		        ])
+	  		    }
+	  		}
+	  	
+	  	var PetitionFromContribPage = {
+	  		    view: function() {
+	  		    	return m("main", [
+	  		            m("h1", {class: "title"}, "Liste des pétitions signées pour un signataire"),
+	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
+	  		            m("div", {id: "form"}, m(FormPetitionContrib)),
+	  		        ])
+	  		    }
+	  		}
 	
 	  	m.route(document.body, "/list", {
 	  		"/list": ListPetitionPage,
 	  		"/create": CreatePetitionPage,
-	  		"/vote/:id": VotePage
+	  		"/vote/:id": VotePage,
+	  		"/top": CentPremierPage,
+	  		"/contributor": PetitionFromContribPage
 	  	})	
 	
 
