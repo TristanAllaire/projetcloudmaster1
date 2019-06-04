@@ -5,8 +5,8 @@
   <packaging>war</packaging>
   <version>0.1.0-SNAPSHOT</version>
 
-  <groupId>petitioncloud</groupId>
-  <artifactId>petitioncloud</artifactId>
+  <groupId>petitionscloud</groupId>
+  <artifactId>petitionscloud</artifactId>
 
   <properties>
     <appengine.maven.plugin.version>2.0.0</appengine.maven.plugin.version>

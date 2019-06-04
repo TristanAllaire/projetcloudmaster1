@@ -1,4 +1,4 @@
-package petitioncloud;
+package petitionscloud;
 
 import java.io.IOException;
 import java.io.PrintWriter;

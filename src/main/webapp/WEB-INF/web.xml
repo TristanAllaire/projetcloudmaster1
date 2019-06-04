@@ -7,14 +7,13 @@
     <welcome-file>index.html</welcome-file>
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
-  
-   <!-- Wrap the backend with Endpoints Frameworks v2. -->
+     <!-- Wrap the backend with Endpoints Frameworks v2. -->
   <servlet>
       <servlet-name>EndpointsServlet</servlet-name>
       <servlet-class>com.google.api.server.spi.EndpointsServlet</servlet-class>
       <init-param>
           <param-name>services</param-name>
-          <param-value>petitioncloud.PetitionEndpoint</param-value>
+          <param-value>petitionscloud.PetitionEndpoint</param-value>
       </init-param>
   </servlet>
   <!-- Route API method requests to the backend. -->

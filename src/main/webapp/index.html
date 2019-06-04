@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
-    <title>Hello App Engine</title>
+    <title>Le Petit Cloud</title>
   </head>
 
   <body>
@@ -23,6 +23,15 @@
 	  		        })
 	  		    },
 	  		    current: {},
+	  		    load: function(id) {
+	  		    	return m.request({
+	  		            method: "GET",
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/listPetition/"+id,
+	  		            withCredentials: true,
+	  		    	}).then(function(result){
+	  		    		Petition.current = result.key
+	  		    	})
+	  		    },
 	  		    save: function() {
 	  		    	console.log("saving...",Petition.current)
 	  		        return m.request({
@@ -33,7 +42,17 @@
 	  		        	console.log("got:",result)
 	  		        	Petition.loadList()
 	  		        })
-	  		    }
+	  		    },
+				addAVote: function() {
+	  		        return m.request({
+	  		            method: "PUT",
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addAVote/"+Petition.current.name
+	  		        })
+	  		        .then(function(result) {
+	  		        	console.log("got:",result)
+	  		        	Petition.loadList()
+	  		        })
+				}
 	  		}
 	  	
 	  	var Contributor = {
@@ -66,7 +85,17 @@
 	  		        	console.log("got:",result)
 	  		        	Contributor.loadList()
 	  		        })
-	  		    }
+	  		    },
+	  		    listContributorForAPetition: function(id) {
+	  		    	return m.request({
+	  		            method: "GET",
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/entity/"+id,
+	  		            withCredentials: true,
+	  		    	}).then(function(result){
+	  		    		Contributor.list = result
+	  		    		console.log("Nombre de votants pour : ", id ," ",result.items.length)
+	  		    	})	
+	  		    },
 	  	}
 	
 	  	var PetitionView = {
@@ -74,26 +103,13 @@
 	  		    view: function() {
 	  		        return m(".user-list", Petition.list.map(function(item) {
 	  		            return m("item", [
-	  		            	m("label.label", {class:".user-list-item"}, item.properties.name + " " + item.properties.votecount),
-	  		            	m("button", {onclick: function() {Contributor.current.name=item.properties.name}}, "Voter")
-	  		            ])
+	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.name, oncreate: m.route.link
+	  		            			} ,item.properties.name + " " + item.properties.votecount)	  		            
+	  		            	])
 	  		        }))
 	  		    },
 	  			
 	  	}
-	
-	  	var count = 0;
-	
-	  	var Hello = {
-	  		    view: function() {
-	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, "Entrez le nom d'une pétition"),
-	  		            m("div", {id: "box"}, m(PetitionView)),
-	  		            m("div", {id: "form"}, m(Form)),
-	  		            m("div", {id: "formcontributor"}, m(FormContributor))
-	  		        ])
-	  		    }
-	  		}
 	
 	
 	  	var Form = {
@@ -115,18 +131,14 @@
 	  	}
 	  	
 	  	var FormContributor = {
-	  			view: function() {
+	  			view: function() {	  				
 	  		        return m("form", {
 	  		                onsubmit: function(e) {
 	  		                    e.preventDefault()
 	  		                    Contributor.save()
+	  		                	m.route.set('/list');
 	  		                }
 	  		            }, [
-	  		            m("label.label", "name"),
-	  		            m("input.input[type=text][placeholder=Nom de la pétition]", {
-	  		                oninput: function (e) {Contributor.current.name=e.target.value},
-	  		                value: Contributor.current.name
-	  		            }),
 	  		          	m("label.label", "firstName"),
 	  		            m("input.input[type=text][placeholder=Prénom]", {
 	  		                oninput: function (e) {Contributor.current.firstname=e.target.value},
@@ -156,8 +168,44 @@
 	  		        ])
 	  		    }
 	  	}
+	  	
+	  	var ListPetitionPage = {
+	  		    view: function() {
+	  		    	return m("main", [
+	  		            m("h1", {class: "title"}, "Liste des pétitions ouvertes"),
+	  		            m("div", {id: "box"}, m(PetitionView)),
+	  		            m("div", {id: "form"}, m(Form)),
+	  		        ])
+	  		    }
+	  		}
+	  	
+	  	var CreatePetitionPage = {
+	  		    view: function() {
+	  		    	return m("main", [
+	  		            m("h1", {class: "title"}, "Création d'une pétition"),
+	  		        ])
+	  		    }
+	  		}
+	  	
+	  	var VotePage = {
+	  			oninit: function(vnode) {
+	  				Petition.load(vnode.attrs.id)
+	  				Contributor.current.name = Petition.current.name
+	  			},
+	  		    view: function() {
+	  		    	return m("main", [
+	  		            m("h1", {class: "title"}, "Voter pour une pétition"),
+	  		            m("div", {id: "formcontributor"}, m(FormContributor)),
+	  		            m("button", {onclick: function() {Contributor.listContributorForAPetition(Contributor.current.name)}},"Obtenir le nombre de votants pour cette pétition" )
+	  		        ])
+	  		    }
+	  		}
 	
-	  	m.mount(document.body, Hello)	
+	  	m.route(document.body, "/list", {
+	  		"/list": ListPetitionPage,
+	  		"/create": CreatePetitionPage,
+	  		"/vote/:id": VotePage
+	  	})	
 	
 
   	</script>
