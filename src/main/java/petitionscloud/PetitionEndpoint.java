@@ -32,7 +32,7 @@ public class PetitionEndpoint {
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
+		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
 		return result;
 	}
 	
@@ -43,7 +43,7 @@ public class PetitionEndpoint {
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
+		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
 		return result;
 	}
 
@@ -131,7 +131,7 @@ public class PetitionEndpoint {
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		PreparedQuery pq = datastore.prepare(q);
-		List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
+		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
 		return result;
 	}
 }
