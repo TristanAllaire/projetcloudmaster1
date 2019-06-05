@@ -8,13 +8,58 @@
   <body>
   	<script src="https://unpkg.com/mithril/mithril.js"></script>
   	<script>
+  	
+  		var Verifier = {
+  				petitionDuplicateName: function() {
+	  		        return m.request({
+	  		            method: "GET",
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/entity",
+	  		            withCredentials: true,
+	  		        })
+	  		        .then(function(result) {
+	  		        	console.log("got:",result.items)
+	  		        	let okayToGo = true
+	  		        	result.items.forEach((element) => {
+	  		        		console.log("element ",element.properties.name, " Petition ",Petition.current.name)
+	  		        		if(element.properties.name===Petition.current.name) okayToGo=false
+	  		        	});
+	  		        	console.log("OKEY ? ", okayToGo)
+						if(okayToGo){
+  		                    Petition.save()
+						} else alert("Une pétition du même nom existe déjà, veuillez changer de nom");
+	  		        })
+	  		    }, voteDuplicateEmail: function(email) {
+  		        	let encodedContributor = encodeURIComponent(email);
+	  		        return m.request({
+	  		            method: "POST",
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/votedForContributor/"+encodedContributor,
+	  		            withCredentials: true
+	  		        })
+	  		        .then(function(result) {
+	  		        	console.log("got:",result)
+	  		        	let okayToGo = true
+	  		        	result.items.forEach((element) => {
+	  		        		console.log("element ",element.properties.name, " Petition ",Petition.current.name)
+	  		        		if(element.properties.name===Petition.current.name) okayToGo=false
+	  		        	});
+	  		        	console.log("OKEY ? ", okayToGo)
+						if(okayToGo){
+  		                    Contributor.save()
+  		                    Petition.loadList()
+  		                } else {
+  		                	alert("L'email que vous avez indiqué a déjà été utilisé pour signer cette pétition");
+  		                }
+	  		        })
+	  		    },
+  		}
 	
 	  	var Petition = {
 	  		    list: [],
 	  		    loadList: function() {
 	  		        return m.request({
 	  		            method: "GET",
-	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/entity"
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/entity",
+	  		            withCredentials: true,
 	  		        })
 	  		        .then(function(result) {
 	  		        	Petition.list = result.items
@@ -22,31 +67,43 @@
 	  		        	m.redraw(true) // force
 	  		        })
 	  		    },
-	  		    current: {},
+	  		    current: {
+	  		    	"name":"",
+	  		    	"description":"",
+	  		    	"email":""
+	  		    },
 	  		    load: function(id) {
 	  		    	return m.request({
 	  		            method: "GET",
 	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/listPetition/"+id,
 	  		            withCredentials: true,
 	  		    	}).then(function(result){
-	  		    		Petition.current = result.key
+						if(result!==null){
+		  		    		Petition.current = result.key
+						}
 	  		    	})
 	  		    },
 	  		    save: function() {
 	  		    	console.log("saving...",Petition.current)
 	  		        return m.request({
 	  		            method: "POST",
-	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addPetition/"+Petition.current.name
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addPetition/"+
+	  		            	Petition.current.name+"/"+
+	  		            	Petition.current.description+"/"+
+	  		            	Petition.current.email,
+	  		            withCredentials: true
 	  		        })
 	  		        .then(function(result) {
 	  		        	console.log("got:",result)
 	  		        	Petition.loadList()
+		                m.route.set('/list')
 	  		        })
 	  		    },
 				addAVote: function() {
 	  		        return m.request({
 	  		            method: "POST",
-	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addAVote/"+Petition.current.name
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addAVote/"+Petition.current.name,
+	  		            withCredentials: true
 	  		        })
 	  		        .then(function(result) {
 	  		        	console.log("got:",result)
@@ -56,7 +113,8 @@
 				loadTopHundred: function(){
 	  		        return m.request({
 	  		            method: "GET",
-	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/entitycollection"
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/entitycollection",
+	  		            withCredentials: true
 	  		        })
 	  		        .then(function(result) {
 	  		        	Petition.list = result.items
@@ -64,15 +122,20 @@
 	  		        	m.redraw(true) // force
 	  		        })
 				},
+				votedForAContribu: [],
 				loadfromcontributor: function(){
 					let encodedContributor = encodeURIComponent(Contributor.current.email);
 	  		        return m.request({
 	  		            method: "POST",
-	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/votedForContributor/"+encodedContributor
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/votedForContributor/"+encodedContributor,
+	  		            withCredentials: true
 	  		        })
 	  		        .then(function(result) {
-	  		        	console.log("Petitions du Contributor :",result.items)//////////TU ES RENDU LA
-	  		        	m.redraw(true) // force
+	  		        	votedForAContribu = []	  		        
+	  		        	result.items.forEach((element) => {
+	  		        		console.log("element ",element)
+	  		        		Petition.votedForAContribu.push(element.properties.name)
+	  		        	})
 	  		        })
 				}
 	  		}
@@ -82,7 +145,8 @@
 	  		    loadList: function() {
 	  		        return m.request({
 	  		            method: "GET",
-	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/entity"
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/entity",
+	  		            withCredentials: true
 	  		        })
 	  		        .then(function(result) {
 	  		        	Contributor.list = result.items
@@ -90,7 +154,14 @@
 	  		        	m.redraw(true) // force
 	  		        })
 	  		    },
-	  		    current: {},
+	  		    current: {
+	  		    	"name":"",
+	  		    	"firstname":"",
+	  		    	"lastname":"",
+	  		    	"email":"",
+	  		    	"zipcode":0,
+	  		    	"city":"",
+	  		    },
 	  		    save: function() {
 	  		    	console.log("saving...",Contributor.current)
 	  		        return m.request({
@@ -101,16 +172,19 @@
 	  		          	Contributor.current.firstname+"/"+
 	  		          	Contributor.current.lastname+"/"+
 	  		          	Contributor.current.zipcode+"/"+
-	  		          	Contributor.current.city
+	  		          	Contributor.current.city,
+	  		            withCredentials: true
 	  		        })
 	  		        .then(function(result) {
 	  		        	console.log("got:",result)
 	  		        	return m.request({
 	  		        		method: "POST",
-		  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addAVote/"+result.properties.name
+		  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addAVote/"+result.properties.name,
+		  		            withCredentials: true
 	  		        	}).then(function(result) {
 	  		        		console.log("résultat ",result)
 	  		        		Contributor.loadList()
+	  		        		m.route.set('/list')
 	  		        	})
 	  		        })
 	  		    },
@@ -132,8 +206,10 @@
 	  		        return m(".user-list", Petition.list.map(function(item) {
 	  		            return m("div.item", [
 	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.name, oncreate: m.route.link
-	  		            			} ,item.properties.name + " " + item.properties.votecount)	  		            
-	  		            	])
+	            			} ,item.properties.name + " " + item.properties.votecount + " " + item.properties.description),
+	            			m("span"," créée par "),
+	            			m("a.user-list-item-author", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
+	            		])
 	  		        }))
 	  		    },
 	  			
@@ -145,8 +221,10 @@
 	  		        return m(".user-list", Petition.list.map(function(item) {
 	  		            return m("div.item", [
 	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.name, oncreate: m.route.link
-	  		            			} ,item.properties.name + " " + item.properties.votecount)	  		            
-	  		            	])
+		            			} ,item.properties.name + " " + item.properties.votecount + " " + item.properties.description),
+		            			m("span"," créée par "),
+		            			m("a.user-list-item-author", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
+		            	])
 	  		        }))
 	  		    },
 	  			
@@ -154,10 +232,10 @@
 	  	
 	  	var ContributorPetitionView = {
 	  		    view: function() {
-	  		        return m(".user-list", Petition.list.map(function(item) {
+	  		        return m(".user-list", Petition.votedForAContribu.map(function(item) {
 	  		            return m("div.item", [
-	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.name, oncreate: m.route.link
-	  		            			} ,item.properties.name + " " + item.properties.votecount)	  		            
+	  		            	m("a.user-list-item", {href:"/vote/"+item, oncreate: m.route.link
+	  		            			} ,item)	  		            
 	  		            	])
 	  		        }))
 	  		    },
@@ -170,15 +248,30 @@
 	  		        return m("form", {
 	  		                onsubmit: function(e) {
 	  		                    e.preventDefault()
-	  		                    Petition.save()
+	  		                    if(Petition.current.name.replace(/\s/g, "").length>0 &&
+	  		                    		Petition.current.description.replace(/\s/g, "").length>0 &&
+	  		                    		Petition.current.email.replace(/\s/g, "").length>0){
+		  		                    Verifier.petitionDuplicateName()
+	  		                    }
+	  		                    else alert("Un des champs n'a pas été rempli")
 	  		                }
 	  		            }, [
 	  		            m("label.label", "name"),
-	  		            m("input.input[type=text][placeholder=name]", {
+	  		            m("input.input[type=text][placeholder=nom]", {
 	  		                oninput: function (e) {Petition.current.name=e.target.value},
 	  		                value: Petition.current.name
 	  		            }),
-	  		            m("button.button[type=submit]", "Save"),
+	  		            m("label.label", "description"),
+	  		            m("input.input[type=text][placeholder=description]", {
+	  		                oninput: function (e) {Petition.current.description=e.target.value},
+	  		                value: Petition.current.description
+	  		            }),
+	  		            m("label.label", "name"),
+	  		            m("input.input[type=email][placeholder=mail de l'auteur]", {
+	  		                oninput: function (e) {Petition.current.email=e.target.value},
+	  		                value: Petition.current.email
+	  		            }),
+	  		            m("button.button[type=submit]", "Appliquer"),
 	  		        ])
 	  		    }
 	  	}
@@ -187,18 +280,16 @@
 	  			view: function() {
 	  		        return m("form", {
 	  		                onsubmit: function(e) {
-	  		                    e.preventDefault()
-	  		                    Petition.save()
+	  		                	Petition.loadfromcontributor()
+	  		  		        	m.redraw(true) // force
 	  		                }
 	  		            }, [
 	  		            m("label.label", "email"),
 	  		            m("input.input[type=text][placeholder=email]", {
 	  		                oninput: function (e) {Contributor.current.email=e.target.value},
-	  		                value: Petition.current.email
+	  		                value: Contributor.current.email
 	  		            }),
-	  		            m("button.button",{onclick: function(){
-	  		            	Petition.loadfromcontributor()
-	  		            }}, "Charger")
+	  		            m("button.button[type=submit]", "Charger")
 	  		        ])
 	  		    }
 	  	}
@@ -208,8 +299,14 @@
 	  		        return m("form", {
 	  		                onsubmit: function(e) {
 	  		                    e.preventDefault()
-	  		                    Contributor.save()
-	  		                	m.route.set('/list');
+	  		                    if(Contributor.current.firstname.replace(/\s/g, "").length>0 &&
+	  		                    		Contributor.current.lastname.replace(/\s/g, "").length>0 &&
+	  		                    		Contributor.current.email.replace(/\s/g, "").length>0 &&
+	  		                    		Contributor.current.zipcode.replace(/\s/g, "").length>0 &&
+	  		                    		Contributor.current.city.replace(/\s/g, "").length>0){
+		  		                    Verifier.voteDuplicateEmail(Contributor.current.email)
+	  		                    }
+	  		                    else alert("Un des champs n'a pas été rempli")
 	  		                }
 	  		            }, [
 	  		          	m("label.label", "firstName"),
@@ -223,7 +320,7 @@
 	  		                value: Contributor.current.lastname
 	  		            }),
 	  		          	m("label.label", "email"),
-	  		            m("input.input[type=email][placeholder=Nom de famille]", {
+	  		            m("input.input[type=email][placeholder=email]", {
 	  		                oninput: function (e) {Contributor.current.email=e.target.value},
 	  		                value: Contributor.current.email
 	  		            }),
@@ -247,13 +344,15 @@
 	  		    	return m("main", [
 	  		            m("h1", {class: "title"}, "Liste des pétitions ouvertes"),
 	  		            m("div", {id: "box"}, m(PetitionView)),
-	  		            m("div", {id: "form"}, m(Form)),
 	  		            m("button", {onclick: function(){
   		                	m.route.set('/top');
 	  		            }}, "Accéder au top 100 des meilleurs pétitions"),
 	  		            m("button", {onclick: function(){
   		                	m.route.set('/contributor');
-	  		            }}, "Rechercher les signatures d'un contributeur")
+	  		            }}, "Rechercher les signatures d'un contributeur"),
+	  		            m("button", {onclick: function(){
+  		                	m.route.set('/create');
+	  		            }}, "Créer une pétition")
 	  		        ])
 	  		    }
 	  		}
@@ -262,6 +361,7 @@
 	  		    view: function() {
 	  		    	return m("main", [
 	  		            m("h1", {class: "title"}, "Création d'une pétition"),
+	  		            m("div", {id: "form"}, m(Form))
 	  		        ])
 	  		    }
 	  		}
@@ -289,12 +389,27 @@
 	  		    }
 	  		}
 	  	
-	  	var PetitionFromContribPage = {
+	  	var PetitionFromContribPageSearch = {
 	  		    view: function() {
 	  		    	return m("main", [
 	  		            m("h1", {class: "title"}, "Liste des pétitions signées pour un signataire"),
 	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
 	  		            m("div", {id: "form"}, m(FormPetitionContrib)),
+	  		        ])
+	  		    }
+	  		}
+  		
+	  	var PetitionFromContribPage = {
+	  			oninit: function(vnode) {
+	  				Petition.load(vnode.attrs.id)
+	  				Contributor.current.email = vnode.attrs.id
+	                Petition.loadfromcontributor()
+	  		       	m.redraw(true) // force
+	  			},
+	  		    view: function() {
+	  		    	return m("main", [
+	  		            m("h1", {class: "title"}, "Liste des pétitions signées pour un signataire"),
+	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
 	  		        ])
 	  		    }
 	  		}
@@ -304,7 +419,8 @@
 	  		"/create": CreatePetitionPage,
 	  		"/vote/:id": VotePage,
 	  		"/top": CentPremierPage,
-	  		"/contributor": PetitionFromContribPage
+	  		"/contributor": PetitionFromContribPageSearch,
+	  		"/contributor/:id": PetitionFromContribPage
 	  	})	
 	
 

@@ -59,11 +59,13 @@ public class PetitionEndpoint {
 	}
 	
 	@ApiMethod(name = "addPetition")
-	public Entity addPetition(@Named("name") String name) {
+	public Entity addPetition(@Named("name") String name, @Named("description") String description, @Named("email") String email) {
 		
 		Entity e = new Entity("Petition", ""+name);
 		e.setProperty("name", name);
 		e.setProperty("votecount", 0);
+		e.setProperty("description", description);
+		e.setProperty("email", email);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		datastore.put(e);
@@ -117,11 +119,8 @@ public class PetitionEndpoint {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		datastore.put(e);
 		
-		
-		
 		return  e;
 	}
-	
 
 	
 	@ApiMethod(name = "votedForContributor")
