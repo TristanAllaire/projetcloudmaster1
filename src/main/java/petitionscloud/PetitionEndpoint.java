@@ -58,6 +58,21 @@ public class PetitionEndpoint {
 		return result;
 	}
 	
+	@ApiMethod(name = "listContributor")
+	public Entity listContributor(@Named("email") String email, @Named("name") String name) {
+		Filter emailFilter = new FilterPredicate("email", FilterOperator.EQUAL, email);
+		Filter nameFilter = new FilterPredicate("name", FilterOperator.EQUAL, name);
+		
+		Query q = new Query("Contributor");
+		q.setFilter(nameFilter);
+		q.setFilter(emailFilter);
+
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		PreparedQuery pq = datastore.prepare(q);
+		Entity result = pq.asSingleEntity();
+		return result;
+	}
+	
 	@ApiMethod(name = "addPetition")
 	public Entity addPetition(@Named("name") String name, @Named("description") String description, @Named("email") String email) {
 		

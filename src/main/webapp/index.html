@@ -13,16 +13,12 @@
   				petitionDuplicateName: function() {
 	  		        return m.request({
 	  		            method: "GET",
-	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/entity",
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/listPetition/"+Petition.current.name,
 	  		            withCredentials: true,
 	  		        })
 	  		        .then(function(result) {
-	  		        	console.log("got:",result.items)
 	  		        	let okayToGo = true
-	  		        	result.items.forEach((element) => {
-	  		        		console.log("element ",element.properties.name, " Petition ",Petition.current.name)
-	  		        		if(element.properties.name===Petition.current.name) okayToGo=false
-	  		        	});
+	  		        	if(result!==null) okayToGo = false
 	  		        	console.log("OKEY ? ", okayToGo)
 						if(okayToGo){
   		                    Petition.save()
@@ -31,18 +27,15 @@
 	  		    }, voteDuplicateEmail: function(email) {
   		        	let encodedContributor = encodeURIComponent(email);
 	  		        return m.request({
-	  		            method: "POST",
-	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/votedForContributor/"+encodedContributor,
+	  		            method: "GET",
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/listContributor/"+encodedContributor+"/"+Petition.current.name,
 	  		            withCredentials: true
 	  		        })
 	  		        .then(function(result) {
 	  		        	console.log("got:",result)
 	  		        	let okayToGo = true
-	  		        	result.items.forEach((element) => {
-	  		        		console.log("element ",element.properties.name, " Petition ",Petition.current.name)
-	  		        		if(element.properties.name===Petition.current.name) okayToGo=false
-	  		        	});
-	  		        	console.log("OKEY ? ", okayToGo)
+	  		        	if(result!==null) okayToGo = false
+	  		        	console.log("OKAY ? ", okayToGo)
 						if(okayToGo){
   		                    Contributor.save()
   		                    Petition.loadList()
@@ -266,7 +259,7 @@
 	  		                oninput: function (e) {Petition.current.description=e.target.value},
 	  		                value: Petition.current.description
 	  		            }),
-	  		            m("label.label", "name"),
+	  		            m("label.label", "email"),
 	  		            m("input.input[type=email][placeholder=mail de l'auteur]", {
 	  		                oninput: function (e) {Petition.current.email=e.target.value},
 	  		                value: Petition.current.email
