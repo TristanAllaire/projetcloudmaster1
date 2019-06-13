@@ -200,7 +200,9 @@
 	  		        return m(".user-list", Petition.list.map(function(item) {
 	  		            return m("div.item", [
 	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.name, oncreate: m.route.link
-	            			} ,item.properties.name + " " + item.properties.votecount + " " + item.properties.description),
+	            			} ,item.properties.name),
+							m("p.user-list-number-vote", item.properties.votecount),
+							m("p.user-list-description",  item.properties.description),
 	            			m("span"," créée par "),
 	            			m("a.user-list-item-author", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
 	            		])
@@ -386,7 +388,7 @@
 	  	var PetitionFromContribPageSearch = {
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, "Liste des pétitions signées pour un signataire"),
+	  		            m("h1", {class: "title"}, "Liste des pétitions signées par un signataire"),
 	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
 	  		            m("div", {id: "form"}, m(FormPetitionContrib)),
 	  		        ])
@@ -402,7 +404,7 @@
 	  			},
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, "Liste des pétitions signées pour un signataire"),
+	  		            m("h1", {class: "title"}, "Liste des pétitions signées par un signataire"),
 	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
 	  		        ])
 	  		    }
