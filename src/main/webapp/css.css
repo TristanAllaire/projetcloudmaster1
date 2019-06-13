@@ -28,7 +28,7 @@ button {
     background: #6ab8ff;
     padding: 10px 20px 10px 20px;
     text-decoration: none;
-    margin : 2%;
+    margin : 2% !important;
 }
 
 button:hover {

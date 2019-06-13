@@ -3,6 +3,9 @@
   <head>
 	<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
 	<link rel="stylesheet" href="css.css"/>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> 
     <title>Le Petit Cloud</title>
   </head>
 
@@ -338,17 +341,19 @@
 	  	var ListPetitionPage = {
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, "Liste des pétitions ouvertes"),
-	  		            m("div", {id: "box"}, m(PetitionView)),
-	  		            m("button", {onclick: function(){
-  		                	m.route.set('/top');
-	  		            }}, "Accéder au top 100 des meilleurs pétitions"),
-	  		            m("button", {onclick: function(){
-  		                	m.route.set('/contributor');
-	  		            }}, "Rechercher les signatures d'un contributeur"),
-	  		            m("button", {onclick: function(){
-  		                	m.route.set('/create');
-	  		            }}, "Créer une pétition")
+	  					m("nav", {class: "navbar navbar-default"}, [
+						  m("h1", {class: "navbar-brand"}, "Liste des pétitions ouvertes"),
+							m("button", {onclick: function(){
+								m.route.set('/top');
+							}}, "Accéder au top 100 des meilleurs pétitions"),
+							m("button", {onclick: function(){
+								m.route.set('/contributor');
+							}}, "Rechercher les signatures d'un contributeur"),
+							m("button", {onclick: function(){
+								m.route.set('/create');
+							}}, "Créer une pétition")
+						]),
+						m("div", {id: "box"}, m(PetitionView))
 	  		        ])
 	  		    }
 	  		}
