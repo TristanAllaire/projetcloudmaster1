@@ -338,7 +338,7 @@
 	  	var ListPetitionPage = {
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, {href:"/list", oncreate: m.route.link},"Liste des pétitions ouvertes"),
+	  		            m("h1", {class: "title"}, "Liste des pétitions ouvertes"),
 	  		            m("div", {id: "box"}, m(PetitionView)),
 	  		            m("button", {onclick: function(){
   		                	m.route.set('/top');
@@ -356,7 +356,7 @@
 	  	var CreatePetitionPage = {
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, {href:"/list", oncreate: m.route.link}, "Création d'une pétition"),
+	  		            m("h1", {class: "title"}, "Création d'une pétition"),
 	  		            m("div", {id: "form"}, m(Form))
 	  		        ])
 	  		    }
@@ -369,7 +369,7 @@
 	  			},
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, {href:"/list", oncreate: m.route.link}, "Voter pour une pétition"),
+	  		            m("h1", {class: "title"}, "Voter pour une pétition"),
 	  		            m("div", {id: "formcontributor"}, m(FormContributor)),
 	  		            m("button", {onclick: function() {Contributor.listContributorForAPetition(Contributor.current.name)}},"Obtenir le nombre de votants pour cette pétition" )
 	  		        ])
@@ -379,7 +379,7 @@
 	  	var CentPremierPage = {
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, {href:"/list", oncreate: m.route.link}, "Liste des 100 meilleures pétitions"),
+	  		            m("h1", {class: "title"}, "Liste des 100 meilleures pétitions"),
 	  		            m("div", {id: "box"}, m(HundredPetitionView)),
 	  		        ])
 	  		    }
@@ -388,7 +388,7 @@
 	  	var PetitionFromContribPageSearch = {
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, {href:"/list", oncreate: m.route.link}, "Liste des pétitions signées par un signataire"),
+	  		            m("h1", {class: "title"}, "Liste des pétitions signées par un signataire"),
 	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
 	  		            m("div", {id: "form"}, m(FormPetitionContrib)),
 	  		        ])
@@ -404,7 +404,7 @@
 	  			},
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, {href:"/list", oncreate: m.route.link}, "Liste des pétitions signées par un signataire"),
+	  		            m("h1", {class: "title"}, "Liste des pétitions signées par un signataire"),
 	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
 	  		        ])
 	  		    }
