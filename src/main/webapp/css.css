@@ -1,0 +1,46 @@
+#box {
+    border-block-color: red;
+}
+
+.title {
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-weight: normal;
+    font-style: normal;
+    display: inline-block;
+    vertical-align: middle;
+    text-decoration: none;
+}
+
+button {
+    -webkit-border-radius: 15;
+    -moz-border-radius: 15;
+    border-radius: 15px;
+    border : none;
+    font-family: Arial;
+    color: #ffffff;
+    font-size: 16px;
+    background: #6ab8ff;
+    padding: 10px 20px 10px 20px;
+    text-decoration: none;
+    margin : 2%;
+}
+
+button:hover {
+    background: #38a1ff;
+    text-decoration: none;
+  }
+
+label {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: normal;
+    margin: 1%;
+}
+
+input {
+    border-radius: 0.2rem;
+    border-style: solid;
+    border-color: black;
+    border-width: thin;
+    padding: 0.3rem;
+    margin: 
+}
