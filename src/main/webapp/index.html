@@ -2,18 +2,49 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+    <meta name="google-signin-client_id" content="304070150071-3bom9avem3ki6lqbcuubmq2b7q70hmfk.apps.googleusercontent.com">
     <title>Le Petit Cloud</title>
   </head>
 
   <body>
   	<script src="https://unpkg.com/mithril/mithril.js"></script>
+  	<script src="https://apis.google.com/js/platform.js" async defer></script>
   	<script>
+  	
+	  	function onSignIn(googleUser) {
+	  		var profile = googleUser.getBasicProfile();
+			console.log("Vous êtes connecté")
+			UserProfile.userInfo.ID = profile.getId()
+			UserProfile.userInfo.name = profile.getName()
+			UserProfile.userInfo.imageURL = profile.getImageUrl()
+			UserProfile.userInfo.email = profile.getEmail()
+	  	}  	
+	  	
+	  	function signOut() {
+	  	    var auth2 = gapi.auth2.getAuthInstance();
+	  	    auth2.signOut().then(function () {
+		  	    console.log('Vous êtes déconnecté');
+				UserProfile.userInfo.ID = ""
+				UserProfile.userInfo.name = ""
+				UserProfile.userInfo.imageURL = ""
+				UserProfile.userInfo.email = ""
+	  	    });
+	  	}
+	  	
+  		var UserProfile = {
+  			userInfo: {
+  					"ID":"",
+  					"name":"",
+  					"imageURL":"",
+  					"email":""
+  			}
+  		}
   	
   		var Verifier = {
   				petitionDuplicateName: function() {
 	  		        return m.request({
 	  		            method: "GET",
-	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/listPetition/"+Petition.current.name,
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/listPetition/"+Petition.current.namep,
 	  		            withCredentials: true,
 	  		        })
 	  		        .then(function(result) {
@@ -28,7 +59,7 @@
   		        	let encodedContributor = encodeURIComponent(email);
 	  		        return m.request({
 	  		            method: "GET",
-	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/listContributor/"+encodedContributor+"/"+Petition.current.name,
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/listContributor/"+encodedContributor+"/"+Petition.current.namep,
 	  		            withCredentials: true
 	  		        })
 	  		        .then(function(result) {
@@ -61,7 +92,7 @@
 	  		        })
 	  		    },
 	  		    current: {
-	  		    	"name":"",
+	  		    	"namep":"",
 	  		    	"description":"",
 	  		    	"email":""
 	  		    },
@@ -78,12 +109,13 @@
 	  		    },
 	  		    save: function() {
 	  		    	console.log("saving...",Petition.current)
+	  		    	let encodedContributor = encodeURIComponent(Contributor.current.email);
 	  		        return m.request({
 	  		            method: "POST",
 	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addPetition/"+
-	  		            	Petition.current.name+"/"+
+	  		            	Petition.current.namep+"/"+
 	  		            	Petition.current.description+"/"+
-	  		            	Petition.current.email,
+	  		            	encodedContributor,
 	  		            withCredentials: true
 	  		        })
 	  		        .then(function(result) {
@@ -95,7 +127,7 @@
 				addAVote: function() {
 	  		        return m.request({
 	  		            method: "POST",
-	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addAVote/"+Petition.current.name,
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addAVote/"+Petition.current.namep,
 	  		            withCredentials: true
 	  		        })
 	  		        .then(function(result) {
@@ -124,11 +156,22 @@
 	  		            withCredentials: true
 	  		        })
 	  		        .then(function(result) {
-	  		        	votedForAContribu = []	  		        
-	  		        	result.items.forEach((element) => {
-	  		        		console.log("element ",element)
-	  		        		Petition.votedForAContribu.push(element.properties.name)
-	  		        	})
+	  		        	Petition.votedForAContribu = result.items
+	  		        	console.log("got ",result)
+	  		        	m.redraw(true) // force
+	  		        })
+				},
+				contributorsList: [],
+				loadContributorForPetition: function(){
+					return m.request({
+	  		            method: "GET",
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/entity/"+Petition.current.name,
+	  		            withCredentials: true
+	  		        })
+	  		        .then(function(result) {
+	  		        	Petition.contributorsList = result.items
+	  		        	console.log("got:",result)
+	  		        	m.redraw(true) // force
 	  		        })
 				}
 	  		}
@@ -148,7 +191,7 @@
 	  		        })
 	  		    },
 	  		    current: {
-	  		    	"name":"",
+	  		    	"namep":"",
 	  		    	"firstname":"",
 	  		    	"lastname":"",
 	  		    	"email":"",
@@ -157,11 +200,12 @@
 	  		    },
 	  		    save: function() {
 	  		    	console.log("saving...",Contributor.current)
+	  		    	let encodedContributor = encodeURIComponent(Contributor.current.email);
 	  		        return m.request({
 	  		            method: "POST",
 	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/voteForPetition/"+
-	  		          	Contributor.current.name+"/"+
-	  		          	Contributor.current.email+"/"+
+	  		          	Contributor.current.namep+"/"+
+	  		          	encodedContributor+"/"+
 	  		          	Contributor.current.firstname+"/"+
 	  		          	Contributor.current.lastname+"/"+
 	  		          	Contributor.current.zipcode+"/"+
@@ -172,7 +216,7 @@
 	  		        	console.log("got:",result)
 	  		        	return m.request({
 	  		        		method: "POST",
-		  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addAVote/"+result.properties.name,
+		  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addAVote/"+result.items[0].properties.namep,
 		  		            withCredentials: true
 	  		        	}).then(function(result) {
 	  		        		console.log("résultat ",result)
@@ -198,8 +242,10 @@
 	  		    view: function() {
 	  		        return m(".user-list", Petition.list.map(function(item) {
 	  		            return m("div.item", [
-	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.name, oncreate: m.route.link
-	            			} ,item.properties.name + " " + item.properties.votecount + " " + item.properties.description),
+	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
+	            			} ,item.properties.namep + " " + item.properties.description),
+	            			m("a.user-list-item", {href:"/voters/"+item.properties.namep, oncreate: m.route.link},
+	            					item.properties.votecount),
 	            			m("span"," créée par "),
 	            			m("a.user-list-item-author", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
 	            		])
@@ -213,9 +259,20 @@
 	  		    view: function() {
 	  		        return m(".user-list", Petition.list.map(function(item) {
 	  		            return m("div.item", [
-	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.name, oncreate: m.route.link
-		            			} ,item.properties.name + " " + item.properties.votecount + " " + item.properties.description),
+	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
+		            			} ,item.properties.namep + " " + item.properties.votecount + " " + item.properties.description),
 		            			m("span"," créée par "),
+		            			m("a.user-list-item-author", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
+		            	])
+	  		        }))
+	  		    },
+	  			
+	  	}
+  		
+	  	var PetitionAllContributorsView = {
+	  		    view: function() {
+	  		        return m(".user-list", Petition.contributorsList.map(function(item) {
+	  		            return m("div.item", [
 		            			m("a.user-list-item-author", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
 		            	])
 	  		        }))
@@ -226,9 +283,10 @@
 	  	var ContributorPetitionView = {
 	  		    view: function() {
 	  		        return m(".user-list", Petition.votedForAContribu.map(function(item) {
+	  		        	console.log("item ",item)
 	  		            return m("div.item", [
-	  		            	m("a.user-list-item", {href:"/vote/"+item, oncreate: m.route.link
-	  		            			} ,item)	  		            
+	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
+	  		            			} ,item.properties.namep)	  		            
 	  		            	])
 	  		        }))
 	  		    },
@@ -241,7 +299,8 @@
 	  		        return m("form", {
 	  		                onsubmit: function(e) {
 	  		                    e.preventDefault()
-	  		                    if(Petition.current.name.replace(/\s/g, "").length>0 &&
+	  		                    Petition.current.email = UserProfile.userInfo.email
+	  		                    if(Petition.current.namep.replace(/\s/g, "").length>0 &&
 	  		                    		Petition.current.description.replace(/\s/g, "").length>0 &&
 	  		                    		Petition.current.email.replace(/\s/g, "").length>0){
 		  		                    Verifier.petitionDuplicateName()
@@ -251,8 +310,8 @@
 	  		            }, [
 	  		            m("label.label", "name"),
 	  		            m("input.input[type=text][placeholder=nom]", {
-	  		                oninput: function (e) {Petition.current.name=e.target.value},
-	  		                value: Petition.current.name
+	  		                oninput: function (e) {Petition.current.namep=e.target.value},
+	  		                value: Petition.current.namep
 	  		            }),
 	  		            m("label.label", "description"),
 	  		            m("input.input[type=text][placeholder=description]", {
@@ -260,9 +319,8 @@
 	  		                value: Petition.current.description
 	  		            }),
 	  		            m("label.label", "email"),
-	  		            m("input.input[type=email][placeholder=mail de l'auteur]", {
-	  		                oninput: function (e) {Petition.current.email=e.target.value},
-	  		                value: Petition.current.email
+	  		            m("input.input[type=email][placeholder=mail de l'auteur][disabled=true]", {
+	  		                value: UserProfile.userInfo.email
 	  		            }),
 	  		            m("button.button[type=submit]", "Appliquer"),
 	  		        ])
@@ -292,6 +350,7 @@
 	  		        return m("form", {
 	  		                onsubmit: function(e) {
 	  		                    e.preventDefault()
+	  		                    Contributor.current.email = UserProfile.userInfo.email
 	  		                    if(Contributor.current.firstname.replace(/\s/g, "").length>0 &&
 	  		                    		Contributor.current.lastname.replace(/\s/g, "").length>0 &&
 	  		                    		Contributor.current.email.replace(/\s/g, "").length>0 &&
@@ -313,9 +372,8 @@
 	  		                value: Contributor.current.lastname
 	  		            }),
 	  		          	m("label.label", "email"),
-	  		            m("input.input[type=email][placeholder=email]", {
-	  		                oninput: function (e) {Contributor.current.email=e.target.value},
-	  		                value: Contributor.current.email
+	  		            m("input.input[type=email][placeholder=email][disabled=true]", {
+	  		                value: UserProfile.userInfo.email
 	  		            }),
 	  		          	m("label.label", "zipCode"),
 	  		            m("input.input[type=number][placeholder=Code postal]", {
@@ -337,7 +395,14 @@
 	  		    	return m("main", [
 	  		            m("h1", {class: "title"}, "Liste des pétitions ouvertes"),
 	  		            m("div", {id: "box"}, m(PetitionView)),
-	  		            m("button", {onclick: function(){
+		  		        m("button",{onclick: function(){
+		  		        	console.log("précédent")
+		  		        }}, "Précédent"),
+		  		        m("button",{onclick: function(){
+		  		        	console.log("suivant")
+
+		  		        }}, "Suivant"),
+		  		        m("button", {onclick: function(){
   		                	m.route.set('/top');
 	  		            }}, "Accéder au top 100 des meilleurs pétitions"),
 	  		            m("button", {onclick: function(){
@@ -345,12 +410,23 @@
 	  		            }}, "Rechercher les signatures d'un contributeur"),
 	  		            m("button", {onclick: function(){
   		                	m.route.set('/create');
-	  		            }}, "Créer une pétition")
+	  		            }}, "Créer une pétition"),
+	  		            m("div", {class:"g-signin2", "data-onsuccess":"onSignIn"}),
+	  		          	m("button", {onclick: function(){
+	  		          		signOut();
+	  		          	}}, "Se Déconnecter")
+
 	  		        ])
 	  		    }
 	  		}
 	  	
 	  	var CreatePetitionPage = {
+  				oninit: function(){
+  					if(UserProfile.userInfo.ID===""){
+	  					alert("Vous devez être connecté pour créer une pétition")
+		                m.route.set('/list')
+	  				}
+  				},
 	  		    view: function() {
 	  		    	return m("main", [
 	  		            m("h1", {class: "title"}, "Création d'une pétition"),
@@ -361,14 +437,20 @@
 	  	
 	  	var VotePage = {
 	  			oninit: function(vnode) {
-	  				Petition.load(vnode.attrs.id)
-	  				Contributor.current.name = vnode.attrs.id
+	  				if(UserProfile.userInfo.ID===""){
+	  					alert("Vous devez être connecté pour voter")
+		                m.route.set('/list')
+	  				} else {
+		  				Petition.load(vnode.attrs.id)
+		  				Contributor.current.namep = vnode.attrs.id
+	  				}
+	  				
 	  			},
 	  		    view: function() {
 	  		    	return m("main", [
 	  		            m("h1", {class: "title"}, "Voter pour une pétition"),
 	  		            m("div", {id: "formcontributor"}, m(FormContributor)),
-	  		            m("button", {onclick: function() {Contributor.listContributorForAPetition(Contributor.current.name)}},"Obtenir le nombre de votants pour cette pétition" )
+	  		            m("button", {onclick: function() {Contributor.listContributorForAPetition(Contributor.current.namep)}},"Obtenir le nombre de votants pour cette pétition" )
 	  		        ])
 	  		    }
 	  		}
@@ -385,7 +467,7 @@
 	  	var PetitionFromContribPageSearch = {
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, "Liste des pétitions signées pour un signataire"),
+	  		            m("h1", {class: "title"}, "Recherche des pétitions signées pour un signataire"),
 	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
 	  		            m("div", {id: "form"}, m(FormPetitionContrib)),
 	  		        ])
@@ -394,10 +476,8 @@
   		
 	  	var PetitionFromContribPage = {
 	  			oninit: function(vnode) {
-	  				Petition.load(vnode.attrs.id)
 	  				Contributor.current.email = vnode.attrs.id
 	                Petition.loadfromcontributor()
-	  		       	m.redraw(true) // force
 	  			},
 	  		    view: function() {
 	  		    	return m("main", [
@@ -406,16 +486,30 @@
 	  		        ])
 	  		    }
 	  		}
-	
+  		
+	  	var VotersForPetition = {
+  				oninit: function(vnode) {
+  					Petition.current.name = vnode.attrs.id
+	                Petition.loadContributorForPetition()
+	  		       	m.redraw(true) // force
+  				},
+	  		    view: function() {
+	  		    	return m("main", [
+	  		            m("h1", {class: "title"}, "Liste des signataires de cette pétition"),
+	  		            m("div", {id: "box"}, m(PetitionAllContributorsView)),
+	  		        ])
+	  		    }
+	  		}
+  		
 	  	m.route(document.body, "/list", {
 	  		"/list": ListPetitionPage,
 	  		"/create": CreatePetitionPage,
 	  		"/vote/:id": VotePage,
+	  		"/voters/:id": VotersForPetition,
 	  		"/top": CentPremierPage,
 	  		"/contributor": PetitionFromContribPageSearch,
 	  		"/contributor/:id": PetitionFromContribPage
-	  	})	
-	
+	  	})
 
   	</script>
   </body>
