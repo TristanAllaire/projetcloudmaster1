@@ -277,14 +277,14 @@
 	  	
 	  	var FormPetitionContrib = {
 	  			view: function() {
-	  		        return m("form", {
+	  		        return m("form.form-group", {
 	  		                onsubmit: function(e) {
 	  		                	Petition.loadfromcontributor()
 	  		  		        	m.redraw(true) // force
 	  		                }
 	  		            }, [
 	  		            m("label.label", "email"),
-	  		            m("input.input[type=text][placeholder=email]", {
+	  		            m("input.form-control[type=text][placeholder=email]", {
 	  		                oninput: function (e) {Contributor.current.email=e.target.value},
 	  		                value: Contributor.current.email
 	  		            }),
@@ -295,7 +295,7 @@
 	  	
 	  	var FormContributor = {
 	  			view: function() {	  				
-	  		        return m("form", {
+	  		        return m("form.gorm-group", {
 	  		                onsubmit: function(e) {
 	  		                    e.preventDefault()
 	  		                    if(Contributor.current.firstname.replace(/\s/g, "").length>0 &&
@@ -309,27 +309,27 @@
 	  		                }
 	  		            }, [
 	  		          	m("label.label", "firstName"),
-	  		            m("input.input[type=text][placeholder=Prénom]", {
+	  		            m("input.form-control[type=text][placeholder=Prénom]", {
 	  		                oninput: function (e) {Contributor.current.firstname=e.target.value},
 	  		                value: Contributor.current.firstname
 	  		            }),
 	  		          	m("label.label", "lastName"),
-	  		            m("input.input[type=text][placeholder=Nom de famille]", {
+	  		            m("input.form-control[type=text][placeholder=Nom de famille]", {
 	  		                oninput: function (e) {Contributor.current.lastname=e.target.value},
 	  		                value: Contributor.current.lastname
 	  		            }),
 	  		          	m("label.label", "email"),
-	  		            m("input.input[type=email][placeholder=email]", {
+	  		            m("input.form-control[type=email][placeholder=email]", {
 	  		                oninput: function (e) {Contributor.current.email=e.target.value},
 	  		                value: Contributor.current.email
 	  		            }),
 	  		          	m("label.label", "zipCode"),
-	  		            m("input.input[type=number][placeholder=Code postal]", {
+	  		            m("input.form-control[type=number][placeholder=Code postal]", {
 	  		                oninput: function (e) {Contributor.current.zipcode=e.target.value},
 	  		                value: Contributor.current.zipcode
 	  		            }),
 	  		          	m("label.label", "city"),
-	  		            m("input.input[type=text][placeholder=Ville]", {
+	  		            m("input.form-control[type=text][placeholder=Ville]", {
 	  		                oninput: function (e) {Contributor.current.city=e.target.value},
 	  		                value: Contributor.current.city
 	  		            }),
