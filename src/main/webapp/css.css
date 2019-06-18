@@ -26,3 +26,7 @@ a {
 .user-list-item-author {
     text-decoration: none;
 }
+
+.name-petition {
+    padding: 10px;
+}

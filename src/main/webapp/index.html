@@ -15,7 +15,7 @@
   	<script src="https://unpkg.com/mithril/mithril.js"></script>
   	<script src="https://apis.google.com/js/platform.js" async defer></script>
   	<script>
-  	
+  	/* ERREUR BOUTON SIGN IN*/
 	  	function onSignIn(googleUser) {
 	  		var profile = googleUser.getBasicProfile();
 			console.log("Vous êtes connecté")
@@ -247,10 +247,14 @@
 	  		    view: function() {
 	  		        return m(".user-list", Petition.list.map(function(item) {
 	  		            return m(".card", [
-							m("div.card-body", [
+							m("div.card-header", [
 								m("a.name-petition card-title", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
 								} ,item.properties.namep),
-								m("a.user-list-number-vote card-link", {href:"/voters/"+item.properties.namep, oncreate: m.route.link}, item.properties.votecount),
+							]),
+							m("div.card-body", [
+								m("p", {class: "card-text"}," Nombre de votant :  ", [
+									m("a.user-list-number-vote card-link", {href:"/voters/"+item.properties.namep, oncreate: m.route.link}, item.properties.votecount),
+								]),
 								m("p", {class: "card-text"}, item.properties.description),
 								m("span.card-text"," créée par "),
 								m("a.user-list-item-author card-link", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
@@ -265,10 +269,16 @@
 	  		    view: function() {
 	  		        return m(".user-list", Petition.list.map(function(item) {
 	  		            return m("div.card", [
-	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
-		            			} ,item.properties.namep + " " + item.properties.votecount + " " + item.properties.description),
-		            			m("span"," créée par "),
-		            			m("a.user-list-item-author", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
+						  m("div.card-header", [
+								m("a.name-petition card-title", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
+								} ,item.properties.namep),
+							]),
+							m("div.card-body", [
+								m("p", {class: "card-text"}," Nombre de votant :  "+item.properties.votecount),
+								m("p", {class: "card-text"}, item.properties.description),
+								m("span.card-text"," créée par "),
+								m("a.user-list-item-author card-link", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
+							]),
 		            	])
 	  		        }))
 	  		    },	
@@ -283,7 +293,7 @@
 	  		        }))
 	  		    },
 	  	}
-	  	
+	  	/* AFFICHAGE A FAIRE EN CONSOLE CA FONCTIONNE */
 	  	var ContributorPetitionView = {
 	  		    view: function() {
 	  		        return m(".user-list", Petition.votedForAContribu.map(function(item) {
@@ -347,10 +357,12 @@
 	  		        ])
 	  		    }
 	  	}
-	  	
+
+/*ERREUR AU MOMENT DU VOTE*/
+
 	  	var FormContributor = {
 	  			view: function() {	  				
-	  		        return m("form.gorm-group", {
+	  		        return m("form.form-group", {
 	  		                onsubmit: function(e) {
 	  		                    e.preventDefault()
 	  		                    Contributor.current.email = UserProfile.userInfo.email
@@ -364,12 +376,12 @@
 	  		                    else alert("Un des champs n'a pas été rempli")
 	  		                }
 	  		            }, [
-	  		          	m("label.label", "firstName"),
+	  		          	m("label.label", "Prénom"),
 	  		            m("input.form-control[type=text][placeholder=Prénom]", {
 	  		                oninput: function (e) {Contributor.current.firstname=e.target.value},
 	  		                value: Contributor.current.firstname
 	  		            }),
-	  		          	m("label.label", "lastName"),
+	  		          	m("label.label", "Nom de famille"),
 	  		            m("input.form-control[type=text][placeholder=Nom de famille]", {
 	  		                oninput: function (e) {Contributor.current.lastname=e.target.value},
 	  		                value: Contributor.current.lastname
@@ -378,17 +390,17 @@
 	  		            m("input.form-control[type=email][placeholder=email][disabled=true]", {
 	  		                value: UserProfile.userInfo.email
 	  		            }),
-	  		          	m("label.label", "zipCode"),
+	  		          	m("label.label", "Code postal"),
 	  		            m("input.form-control[type=number][placeholder=Code postal]", {
 	  		                oninput: function (e) {Contributor.current.zipcode=e.target.value},
 	  		                value: Contributor.current.zipcode
 	  		            }),
-	  		          	m("label.label", "city"),
+	  		          	m("label.label", "Ville"),
 	  		            m("input.form-control[type=text][placeholder=Ville]", {
 	  		                oninput: function (e) {Contributor.current.city=e.target.value},
 	  		                value: Contributor.current.city
 	  		            }),
-	  		            m("button.button[type=submit]", {class: "btn btn-primary"}, "Save"),
+	  		            m("button.button[type=submit]", {class: "btn btn-primary"}, "Voter"),
 	  		        ])
 	  		    }
 	  	}
@@ -478,7 +490,28 @@
 	  			},
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("a", {class: "navbar-brand"}, "Voter pour une pétition"),
+					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
+					  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  	m("ul", {class: "nav navbar-nav"}, [
+							  	m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/list');
+									}}, "Liste des pétitions ouvertes")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/top');
+									}}, "Accéder au top 100 des meilleurs pétitions")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/contributor');
+									}}, "Rechercher les signatures d'un contributeur")),
+								m("li", {class: "nav-item active"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/create');
+									}}, "Créer une pétition")),
+								m("li", {class: "nav-item"}, m("div", {class:"g-signin2", "data-onsuccess":"onSignIn"})),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									signOut();
+									}}, "Se déconnecter"))
+							])
+						]),
+	  		            m("h3", "Voter pour une pétition"),
 	  		            m("div", {id: "formcontributor"}, m(FormContributor)),
 	  		            m("button", {onclick: function() {Contributor.listContributorForAPetition(Contributor.current.namep)}},"Obtenir le nombre de votants pour cette pétition" )
 	  		        ])
@@ -578,7 +611,6 @@
 	  		    }
 	  		}
 
-/* TODO : Style */
 	  	var VotersForPetition = {
   				oninit: function(vnode) {
   					Petition.current.name = vnode.attrs.id
@@ -608,7 +640,7 @@
 									}}, "Se déconnecter")),
 							])
 						]),
-	  		            m("h3", {class: "title"}, "Liste des signataires de cette pétition"),
+	  		            m("div", {class: "nav-brand"}, "Liste des signataires de cette pétition"),
 	  		            m("div", {id: "box"}, m(PetitionAllContributorsView)),
 	  		        ])
 	  		    }
