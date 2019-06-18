@@ -10,3 +10,19 @@ a {
     width: 50%;
     margin-left: 5%;
 }
+
+.card {
+    margin: auto;
+    margin-top: 10px;
+    border-radius: 5px;
+    width: 50%;
+    padding: 10px;
+}
+
+.user-list-number-vote {
+    text-decoration: none;
+}
+
+.user-list-item-author {
+    text-decoration: none;
+}
