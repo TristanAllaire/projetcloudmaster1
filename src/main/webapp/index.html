@@ -62,6 +62,7 @@
 	  		        })
 	  		    }, voteDuplicateEmail: function(email) {
   		        	let encodedContributor = encodeURIComponent(email);
+  		        	console.log("Petition ",Petition.current)
 	  		        return m.request({
 	  		            method: "GET",
 	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/listContributor/"+encodedContributor+"/"+Petition.current.namep,
@@ -295,6 +296,9 @@
 	  	}
 	  	/* TODO : Style */
 	  	var ContributorPetitionView = {
+	  			oninit: function(){
+	  				Petition.votedForAContribu = []
+	  			},
 	  		    view: function() {
 	  		        return m(".user-list", Petition.votedForAContribu.map(function(item) {
 	  		        	console.log("item ",item)
