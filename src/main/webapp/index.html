@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
+	<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+	<link rel="stylesheet" href="css.css"/>
+	<link rel="stylesheet" href="bootstrap.min.css"/>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> 
     <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
     <meta name="google-signin-client_id" content="304070150071-3bom9avem3ki6lqbcuubmq2b7q70hmfk.apps.googleusercontent.com">
     <title>Le Petit Cloud</title>
@@ -10,7 +15,7 @@
   	<script src="https://unpkg.com/mithril/mithril.js"></script>
   	<script src="https://apis.google.com/js/platform.js" async defer></script>
   	<script>
-  	
+  	/* ERREUR BOUTON SIGN IN*/
 	  	function onSignIn(googleUser) {
 	  		var profile = googleUser.getBasicProfile();
 			console.log("Vous êtes connecté")
@@ -57,6 +62,7 @@
 	  		        })
 	  		    }, voteDuplicateEmail: function(email) {
   		        	let encodedContributor = encodeURIComponent(email);
+  		        	console.log("Petition ",Petition.current)
 	  		        return m.request({
 	  		            method: "GET",
 	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/listContributor/"+encodedContributor+"/"+Petition.current.namep,
@@ -109,7 +115,7 @@
 	  		    },
 	  		    save: function() {
 	  		    	console.log("saving...",Petition.current)
-	  		    	let encodedContributor = encodeURIComponent(Contributor.current.email);
+	  		    	let encodedContributor = encodeURIComponent(Petition.current.email);
 	  		        return m.request({
 	  		            method: "POST",
 	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addPetition/"+
@@ -241,62 +247,73 @@
 	  			oninit: Petition.loadList,
 	  		    view: function() {
 	  		        return m(".user-list", Petition.list.map(function(item) {
-	  		            return m("div.item", [
-	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
-	            			} ,item.properties.namep + " " + item.properties.description),
-	            			m("a.user-list-item", {href:"/voters/"+item.properties.namep, oncreate: m.route.link},
-	            					item.properties.votecount),
-	            			m("span"," créée par "),
-	            			m("a.user-list-item-author", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
+	  		            return m(".card", [
+							m("div.card-header", [
+								m("a.name-petition card-title", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
+								} ,item.properties.namep),
+							]),
+							m("div.card-body", [
+								m("p", {class: "card-text"}," Nombre de votant :  ", [
+									m("a.user-list-number-vote card-link", {href:"/voters/"+item.properties.namep, oncreate: m.route.link}, item.properties.votecount),
+								]),
+								m("p", {class: "card-text"}, item.properties.description),
+								m("span.card-text"," créée par "),
+								m("a.user-list-item-author card-link", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
+							])
 	            		])
 	  		        }))
 	  		    },
-	  			
 	  	}
 	  	
 	  	var HundredPetitionView = {
 	  			oninit: Petition.loadTopHundred,
 	  		    view: function() {
 	  		        return m(".user-list", Petition.list.map(function(item) {
-	  		            return m("div.item", [
-	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
-		            			} ,item.properties.namep + " " + item.properties.votecount + " " + item.properties.description),
-		            			m("span"," créée par "),
-		            			m("a.user-list-item-author", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
+	  		            return m("div.card", [
+						  m("div.card-header", [
+								m("a.name-petition card-title", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
+								} ,item.properties.namep),
+							]),
+							m("div.card-body", [
+								m("p", {class: "card-text"}," Nombre de votant :  "+item.properties.votecount),
+								m("p", {class: "card-text"}, item.properties.description),
+								m("span.card-text"," créée par "),
+								m("a.user-list-item-author card-link", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
+							]),
 		            	])
 	  		        }))
-	  		    },
-	  			
+	  		    },	
 	  	}
-  		
+  		/* TODO : Style */
 	  	var PetitionAllContributorsView = {
 	  		    view: function() {
 	  		        return m(".user-list", Petition.contributorsList.map(function(item) {
-	  		            return m("div.item", [
+	  		            return m("div.card", [
 		            			m("a.user-list-item-author", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
 		            	])
 	  		        }))
 	  		    },
-	  			
 	  	}
-	  	
+	  	/* TODO : Style */
 	  	var ContributorPetitionView = {
+	  			oninit: function(){
+	  				Petition.votedForAContribu = []
+	  			},
 	  		    view: function() {
 	  		        return m(".user-list", Petition.votedForAContribu.map(function(item) {
 	  		        	console.log("item ",item)
-	  		            return m("div.item", [
+	  		            return m("div.card", [
 	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
 	  		            			} ,item.properties.namep)	  		            
 	  		            	])
 	  		        }))
-	  		    },
-	  			
+	  		    },	
 	  	}
 	
 	
 	  	var Form = {
 	  			view: function() {
-	  		        return m("form", {
+	  		        return m("form.form-group", {
 	  		                onsubmit: function(e) {
 	  		                    e.preventDefault()
 	  		                    Petition.current.email = UserProfile.userInfo.email
@@ -309,45 +326,47 @@
 	  		                }
 	  		            }, [
 	  		            m("label.label", "name"),
-	  		            m("input.input[type=text][placeholder=nom]", {
+	  		            m("input.form-control[type=text][placeholder=nom]", {
 	  		                oninput: function (e) {Petition.current.namep=e.target.value},
 	  		                value: Petition.current.namep
 	  		            }),
 	  		            m("label.label", "description"),
-	  		            m("input.input[type=text][placeholder=description]", {
+	  		            m("input.form-control[type=text][placeholder=description]", {
 	  		                oninput: function (e) {Petition.current.description=e.target.value},
 	  		                value: Petition.current.description
 	  		            }),
 	  		            m("label.label", "email"),
-	  		            m("input.input[type=email][placeholder=mail de l'auteur][disabled=true]", {
+	  		            m("input.form-control[type=email][placeholder=mail de l'auteur][disabled=true]", {
 	  		                value: UserProfile.userInfo.email
 	  		            }),
-	  		            m("button.button[type=submit]", "Appliquer"),
+	  		            m("button.button[type=submit]", {class: "btn btn-primary"}, "Créer"),
 	  		        ])
 	  		    }
 	  	}
 	  	
 	  	var FormPetitionContrib = {
 	  			view: function() {
-	  		        return m("form", {
+	  		        return m("form.form-group", {
 	  		                onsubmit: function(e) {
 	  		                	Petition.loadfromcontributor()
 	  		  		        	m.redraw(true) // force
 	  		                }
 	  		            }, [
 	  		            m("label.label", "email"),
-	  		            m("input.input[type=text][placeholder=email]", {
+	  		            m("input.form-control[type=text][placeholder=email]", {
 	  		                oninput: function (e) {Contributor.current.email=e.target.value},
 	  		                value: Contributor.current.email
 	  		            }),
-	  		            m("button.button[type=submit]", "Charger")
+	  		            m("button.button[type=submit]", {class: "btn btn-primary"}, "Charger")
 	  		        ])
 	  		    }
 	  	}
-	  	
+
+/*ERREUR AU MOMENT DU VOTE*/
+
 	  	var FormContributor = {
 	  			view: function() {	  				
-	  		        return m("form", {
+	  		        return m("form.form-group", {
 	  		                onsubmit: function(e) {
 	  		                    e.preventDefault()
 	  		                    Contributor.current.email = UserProfile.userInfo.email
@@ -361,31 +380,31 @@
 	  		                    else alert("Un des champs n'a pas été rempli")
 	  		                }
 	  		            }, [
-	  		          	m("label.label", "firstName"),
-	  		            m("input.input[type=text][placeholder=Prénom]", {
+	  		          	m("label.label", "Prénom"),
+	  		            m("input.form-control[type=text][placeholder=Prénom]", {
 	  		                oninput: function (e) {Contributor.current.firstname=e.target.value},
 	  		                value: Contributor.current.firstname
 	  		            }),
-	  		          	m("label.label", "lastName"),
-	  		            m("input.input[type=text][placeholder=Nom de famille]", {
+	  		          	m("label.label", "Nom de famille"),
+	  		            m("input.form-control[type=text][placeholder=Nom de famille]", {
 	  		                oninput: function (e) {Contributor.current.lastname=e.target.value},
 	  		                value: Contributor.current.lastname
 	  		            }),
 	  		          	m("label.label", "email"),
-	  		            m("input.input[type=email][placeholder=email][disabled=true]", {
+	  		            m("input.form-control[type=email][placeholder=email][disabled=true]", {
 	  		                value: UserProfile.userInfo.email
 	  		            }),
-	  		          	m("label.label", "zipCode"),
-	  		            m("input.input[type=number][placeholder=Code postal]", {
+	  		          	m("label.label", "Code postal"),
+	  		            m("input.form-control[type=number][placeholder=Code postal]", {
 	  		                oninput: function (e) {Contributor.current.zipcode=e.target.value},
 	  		                value: Contributor.current.zipcode
 	  		            }),
-	  		          	m("label.label", "city"),
-	  		            m("input.input[type=text][placeholder=Ville]", {
+	  		          	m("label.label", "Ville"),
+	  		            m("input.form-control[type=text][placeholder=Ville]", {
 	  		                oninput: function (e) {Contributor.current.city=e.target.value},
 	  		                value: Contributor.current.city
 	  		            }),
-	  		            m("button.button[type=submit]", "Save"),
+	  		            m("button.button[type=submit]", {class: "btn btn-primary"}, "Voter"),
 	  		        ])
 	  		    }
 	  	}
@@ -393,29 +412,35 @@
 	  	var ListPetitionPage = {
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, "Liste des pétitions ouvertes"),
-	  		            m("div", {id: "box"}, m(PetitionView)),
-		  		        m("button",{onclick: function(){
-		  		        	console.log("précédent")
-		  		        }}, "Précédent"),
-		  		        m("button",{onclick: function(){
-		  		        	console.log("suivant")
 
-		  		        }}, "Suivant"),
-		  		        m("button", {onclick: function(){
-  		                	m.route.set('/top');
-	  		            }}, "Accéder au top 100 des meilleurs pétitions"),
-	  		            m("button", {onclick: function(){
-  		                	m.route.set('/contributor');
-	  		            }}, "Rechercher les signatures d'un contributeur"),
-	  		            m("button", {onclick: function(){
-  		                	m.route.set('/create');
-	  		            }}, "Créer une pétition"),
-	  		            m("div", {class:"g-signin2", "data-onsuccess":"onSignIn"}),
-	  		          	m("button", {onclick: function(){
-	  		          		signOut();
-	  		          	}}, "Se Déconnecter")
-
+					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
+						  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  	m("ul", {class: "navbar-nav"}, [
+							  	m("li", {class: "nav-item active"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/list');
+									}}, "Liste des pétitions ouvertes")),
+								m("li", {class: "nav-item "}, m("a.nav-link", {onclick: function(){
+									m.route.set('/top');
+									}}, "Accéder au top 100 des meilleurs pétitions")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/contributor');
+									}}, "Rechercher les signatures d'un contributeur")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/create');
+									}}, "Créer une pétition")),
+								m("li", {class: "nav-item"}, m("div", {class:"g-signin2", "data-onsuccess":"onSignIn"})),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									signOut();
+									}}, "Se déconnecter")),
+							])
+						]),
+						m("div", {id: "box"}, m(PetitionView))
+//		  		        m("button",{onclick: function(){
+//		  		        	console.log("précédent")
+//		  		        }}, "Précédent"),
+//		  		        m("button",{onclick: function(){
+//		  		        	console.log("suivant")
+//		  		        }}, "Suivant"),
 	  		        ])
 	  		    }
 	  		}
@@ -429,12 +454,33 @@
   				},
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, "Création d'une pétition"),
+					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
+					  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  	m("ul", {class: "nav navbar-nav"}, [
+							  	m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/list');
+									}}, "Liste des pétitions ouvertes")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/top');
+									}}, "Accéder au top 100 des meilleurs pétitions")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/contributor');
+									}}, "Rechercher les signatures d'un contributeur")),
+								m("li", {class: "nav-item active"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/create');
+									}}, "Créer une pétition")),
+								m("li", {class: "nav-item"}, m("div", {class:"g-signin2", "data-onsuccess":"onSignIn"})),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									signOut();
+									}}, "Se déconnecter"))
+							])
+						]),
 	  		            m("div", {id: "form"}, m(Form))
 	  		        ])
 	  		    }
 	  		}
-	  	
+			  
+/* TODO : Style votePage */	  	
 	  	var VotePage = {
 	  			oninit: function(vnode) {
 	  				if(UserProfile.userInfo.ID===""){
@@ -442,13 +488,35 @@
 		                m.route.set('/list')
 	  				} else {
 		  				Petition.load(vnode.attrs.id)
+						Petition.current.namep = vnode.attrs.id
 		  				Contributor.current.namep = vnode.attrs.id
 	  				}
 	  				
 	  			},
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, "Voter pour une pétition"),
+					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
+					  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  	m("ul", {class: "nav navbar-nav"}, [
+							  	m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/list');
+									}}, "Liste des pétitions ouvertes")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/top');
+									}}, "Accéder au top 100 des meilleurs pétitions")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/contributor');
+									}}, "Rechercher les signatures d'un contributeur")),
+								m("li", {class: "nav-item active"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/create');
+									}}, "Créer une pétition")),
+								m("li", {class: "nav-item"}, m("div", {class:"g-signin2", "data-onsuccess":"onSignIn"})),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									signOut();
+									}}, "Se déconnecter"))
+							])
+						]),
+	  		            m("h3", "Voter pour une pétition"),
 	  		            m("div", {id: "formcontributor"}, m(FormContributor)),
 	  		            m("button", {onclick: function() {Contributor.listContributorForAPetition(Contributor.current.namep)}},"Obtenir le nombre de votants pour cette pétition" )
 	  		        ])
@@ -458,7 +526,27 @@
 	  	var CentPremierPage = {
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, "Liste des 100 meilleures pétitions"),
+					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
+					  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  	m("ul", {class: "nav navbar-nav"}, [
+							  	m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/list');
+									}}, "Liste des pétitions ouvertes")),
+								m("li", {class: "nav-item active"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/top');
+									}}, "Accéder au top 100 des meilleurs pétitions")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/contributor');
+									}}, "Rechercher les signatures d'un contributeur")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/create');
+									}}, "Créer une pétition")),
+								m("li", {class: "nav-item"}, m("div", {class:"g-signin2", "data-onsuccess":"onSignIn"})),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									signOut();
+									}}, "Se déconnecter"))
+							])
+						]),
 	  		            m("div", {id: "box"}, m(HundredPetitionView)),
 	  		        ])
 	  		    }
@@ -467,7 +555,28 @@
 	  	var PetitionFromContribPageSearch = {
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, "Recherche des pétitions signées pour un signataire"),
+
+					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
+					  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  	m("ul", {class: "nav navbar-nav"}, [
+							  	m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/list');
+									}}, "Liste des pétitions ouvertes")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/top');
+									}}, "Accéder au top 100 des meilleurs pétitions")),
+								m("li", {class: "nav-item active"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/contributor');
+									}}, "Recherche des pétitions signées pour un signataire")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/create');
+									}}, "Créer une pétition")),
+								m("li", {class: "nav-item"}, m("div", {class:"g-signin2", "data-onsuccess":"onSignIn"})),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									signOut();
+									}}, "Se déconnecter"))
+							])
+						]),
 	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
 	  		            m("div", {id: "form"}, m(FormPetitionContrib)),
 	  		        ])
@@ -481,12 +590,32 @@
 	  			},
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, "Liste des pétitions signées pour un signataire"),
+					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
+					  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  	m("ul", {class: "nav navbar-nav"}, [
+							  	m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/list');
+									}}, "Liste des pétitions ouvertes")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/top');
+									}}, "Accéder au top 100 des meilleurs pétitions")),
+								m("li", {class: "nav-item active"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/contributor');
+									}}, "Rechercher les signatures d'un contributeur")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/create');
+									}}, "Créer une pétition")),
+								m("li", {class: "nav-item"}, m("div", {class:"g-signin2", "data-onsuccess":"onSignIn"})),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									signOut();
+									}}, "Se déconnecter")),
+							])
+						]),
 	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
 	  		        ])
 	  		    }
 	  		}
-  		
+
 	  	var VotersForPetition = {
   				oninit: function(vnode) {
   					Petition.current.name = vnode.attrs.id
@@ -495,7 +624,28 @@
   				},
 	  		    view: function() {
 	  		    	return m("main", [
-	  		            m("h1", {class: "title"}, "Liste des signataires de cette pétition"),
+					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
+					  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  	m("ul", {class: "nav navbar-nav"}, [
+							  	m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/list');
+									}}, "Liste des pétitions ouvertes")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/top');
+									}}, "Accéder au top 100 des meilleurs pétitions")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/contributor');
+									}}, "Rechercher les signatures d'un contributeur")),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									m.route.set('/create');
+									}}, "Créer une pétition")),
+								m("li", {class: "nav-item"}, m("div", {class:"g-signin2", "data-onsuccess":"onSignIn"})),
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
+									signOut();
+									}}, "Se déconnecter")),
+							])
+						]),
+	  		            m("div", {class: "nav-brand"}, "Liste des signataires de cette pétition"),
 	  		            m("div", {id: "box"}, m(PetitionAllContributorsView)),
 	  		        ])
 	  		    }
