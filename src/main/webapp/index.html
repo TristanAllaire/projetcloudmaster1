@@ -28,11 +28,13 @@
 	  	function signOut() {
 	  	    var auth2 = gapi.auth2.getAuthInstance();
 	  	    auth2.signOut().then(function () {
+				alert("Vous êtes déconnecté");
 		  	    console.log('Vous êtes déconnecté');
 				UserProfile.userInfo.ID = ""
 				UserProfile.userInfo.name = ""
 				UserProfile.userInfo.imageURL = ""
 				UserProfile.userInfo.email = ""
+				m.redraw();
 	  	    });
 	  	}
 	  	
@@ -65,7 +67,7 @@
   		        	console.log("Petition ",Petition.current)
 	  		        return m.request({
 	  		            method: "GET",
-	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/listContributor/"+encodedContributor+"/"+Petition.current.namep,
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/listContributor/"+encodedContributor+"/"+Petition.current.name,
 	  		            withCredentials: true
 	  		        })
 	  		        .then(function(result) {
@@ -272,7 +274,7 @@
 								m("p", {class: "card-text"}, item.properties.description),
 								m("span.card-text"," créée par "),
 								m("a.user-list-item-author card-link", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email),
-								m("button", {href:"/vote/"+item.properties.namep, oncreate: m.route.link}, "Voter pour cette pétition"),
+								m("button.btn btn-success vote", {href:"/vote/"+item.properties.namep, oncreate: m.route.link}, "Voter pour cette pétition"),
 							])
 	            		])
 	  		        }))
@@ -294,13 +296,13 @@
 								m("p", {class: "card-text"}, item.properties.description),
 								m("span.card-text"," créée par "),
 								m("a.user-list-item-author card-link", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email),
-								m("button", {href:"/vote/"+item.properties.namep, oncreate: m.route.link}, "Voter pour cette pétition"),
+								m("button.btn btn-success vote", {href:"/vote/"+item.properties.namep, oncreate: m.route.link}, "Voter pour cette pétition"),
 							]),
 		            	])
 	  		        }))
 	  		    },	
 	  	}
-  		/* TODO : Style */
+
 	  	var PetitionAllContributorsView = {
 	  		    view: function() {
 	  		        return m(".user-list", Petition.contributorsList.map(function(item) {
@@ -310,7 +312,7 @@
 	  		        }))
 	  		    },
 	  	}
-	  	/* TODO : Style */
+
 	  	var ContributorPetitionView = {
 	  			oninit: function(){
 	  				Petition.votedForAContribu = []
@@ -393,8 +395,6 @@
 	  		        ])
 	  		    }
 	  	}
-
-/*ERREUR AU MOMENT DU VOTE*/
 
 	  	var FormContributor = {
 	  			view: function() {	  				
@@ -507,7 +507,10 @@
 									}}, "Se déconnecter"))
 							])
 						]),
-	  		            m("div", {id: "form"}, m(Form))
+						m("tr.card", [
+							m("th", "Créer une pétition :"),
+							m("td", m(Form)),
+						]),
 	  		        ])
 	  		    }
 	  		}
@@ -539,7 +542,7 @@
 								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
 									m.route.set('/contributor');
 									}}, "Rechercher les signatures d'un contributeur")),
-								m("li", {class: "nav-item active"}, m("a.nav-link", {onclick: function(){
+								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
 									m.route.set('/create');
 									}}, "Créer une pétition")),
 								m("li", {class: "nav-item"}, m("div", {class:"g-signin2", "data-onsuccess":"onSignIn"})),
@@ -548,9 +551,10 @@
 									}}, "Se déconnecter"))
 							])
 						]),
-	  		            m("h3", "Voter pour une pétition"),
-	  		            m("div", {id: "formcontributor"}, m(FormContributor)),
-	  		            m("button", {onclick: function() {Contributor.listContributorForAPetition(Contributor.current.namep)}},"Obtenir le nombre de votants pour cette pétition" )
+						m("tr.card", [
+							m("th", "Voter pour une pétition :"),
+							m("td", m(FormContributor)),
+						]),
 	  		        ])
 	  		    }
 	  		}
@@ -598,7 +602,7 @@
 									}}, "Accéder au top 100 des meilleurs pétitions")),
 								m("li", {class: "nav-item active"}, m("a.nav-link", {onclick: function(){
 									m.route.set('/contributor');
-									}}, "Recherche des pétitions signées pour un signataire")),
+									}}, "Rechercher les signatures d'un contributeur")),
 								m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
 									m.route.set('/create');
 									}}, "Créer une pétition")),
@@ -608,11 +612,22 @@
 									}}, "Se déconnecter"))
 							])
 						]),
-						m("h1", "Pétitions signées : "),
-	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
-						m("h1", "Pétitions créées : "),
-	  		            m("div", {id: "box"}, m(ContributorCreatedView)),
-	  		            m("div", {id: "form"}, m(FormPetitionContrib)),
+						m("tr.card", [
+							m("th", "Rechercher les pétitions à partir d'un utilisateur : "),
+							m("td", m(FormPetitionContrib)),
+						]),
+						m("div.card border-light mb-3", [
+							m("div.card-header", "Pétitions signées : "),
+						]),
+						m("div.card-body", [
+							m("div", {id: "box"}, m(ContributorPetitionView)),
+						]),
+						m("div.card border-light mb-3", [
+							m("div.card-header", "Pétitions créées : "),
+						]),
+						m("div.card-body", [
+							m("div", {id: "box"}, m(ContributorCreatedView)),
+						]),
 	  		        ])
 	  		    }
 	  		}
@@ -646,10 +661,18 @@
 									}}, "Se déconnecter")),
 							])
 						]),
-						m("h1", "Pétitions signées : "),
-	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
-						m("h1", "Pétitions créées : "),	  		            
-						m("div", {id: "box"}, m(ContributorCreatedView)),
+						m("div.card border-light mb-3", [
+							m("div.card-header", "Pétitions signées : "),
+						]),
+						m("div.card-body", [
+							m("div", {id: "box"}, m(ContributorPetitionView)),
+						]),
+						m("div.card border-light mb-3", [
+							m("div.card-header", "Pétitions créées : "),
+						]),
+						m("div.card-body", [
+							m("div", {id: "box"}, m(ContributorCreatedView)),
+						]),
 	  		        ])
 	  		    }
 	  		}
@@ -683,8 +706,10 @@
 									}}, "Se déconnecter")),
 							])
 						]),
-	  		            m("div", {class: "nav-brand"}, "Liste des signataires de cette pétition"),
-	  		            m("div", {id: "box"}, m(PetitionAllContributorsView)),
+						m("tr.card", [
+							m("th", "Liste des signataires de cette pétition :"),
+							m("td", m(PetitionAllContributorsView)),
+						]),
 	  		        ])
 	  		    }
 	  		}
