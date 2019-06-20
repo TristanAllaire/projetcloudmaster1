@@ -115,7 +115,7 @@
 	  		    },
 	  		    save: function() {
 	  		    	console.log("saving...",Petition.current)
-	  		    	let encodedContributor = encodeURIComponent(Contributor.current.email);
+	  		    	let encodedContributor = encodeURIComponent(Petition.current.email);
 	  		        return m.request({
 	  		            method: "POST",
 	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/addPetition/"+
@@ -163,6 +163,20 @@
 	  		        })
 	  		        .then(function(result) {
 	  		        	Petition.votedForAContribu = result.items
+	  		        	console.log("got ",result)
+	  		        	m.redraw(true) // force
+	  		        })
+				},
+				createdByContribu: [],
+				loadcreatedcontributor: function(){
+					let encodedContributor = encodeURIComponent(Contributor.current.email);
+	  		        return m.request({
+	  		            method: "POST",
+	  		            url: "https://lepetitcloud.appspot.com/_ah/api/petitions/v1/createdByContributor/"+encodedContributor,
+	  		            withCredentials: true
+	  		        })
+	  		        .then(function(result) {
+	  		        	Petition.createdByContribu = result.items
 	  		        	console.log("got ",result)
 	  		        	m.redraw(true) // force
 	  		        })
@@ -249,8 +263,7 @@
 	  		        return m(".user-list", Petition.list.map(function(item) {
 	  		            return m(".card", [
 							m("div.card-header", [
-								m("a.name-petition card-title", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
-								} ,item.properties.namep),
+								m("a.name-petition card-title" ,item.properties.namep),
 							]),
 							m("div.card-body", [
 								m("p", {class: "card-text"}," Nombre de votant :  ", [
@@ -258,7 +271,8 @@
 								]),
 								m("p", {class: "card-text"}, item.properties.description),
 								m("span.card-text"," créée par "),
-								m("a.user-list-item-author card-link", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
+								m("a.user-list-item-author card-link", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email),
+								m("button", {href:"/vote/"+item.properties.namep, oncreate: m.route.link}, "Voter pour cette pétition"),
 							])
 	            		])
 	  		        }))
@@ -271,14 +285,16 @@
 	  		        return m(".user-list", Petition.list.map(function(item) {
 	  		            return m("div.card", [
 						  m("div.card-header", [
-								m("a.name-petition card-title", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
-								} ,item.properties.namep),
+								m("a.name-petition card-title", item.properties.namep),
 							]),
 							m("div.card-body", [
-								m("p", {class: "card-text"}," Nombre de votant :  "+item.properties.votecount),
+								m("p", {class: "card-text"}," Nombre de votant :  ", [
+									m("a.user-list-number-vote card-link", {href:"/voters/"+item.properties.namep, oncreate: m.route.link}, item.properties.votecount),
+								]),								
 								m("p", {class: "card-text"}, item.properties.description),
 								m("span.card-text"," créée par "),
-								m("a.user-list-item-author card-link", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email)
+								m("a.user-list-item-author card-link", {href:"/contributor/" + encodeURIComponent(item.properties.email), oncreate: m.route.link}, item.properties.email),
+								m("button", {href:"/vote/"+item.properties.namep, oncreate: m.route.link}, "Voter pour cette pétition"),
 							]),
 		            	])
 	  		        }))
@@ -301,6 +317,21 @@
 	  			},
 	  		    view: function() {
 	  		        return m(".user-list", Petition.votedForAContribu.map(function(item) {
+	  		        	console.log("item ",item)
+	  		            return m("div.card", [
+	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
+	  		            			} ,item.properties.namep)	  		            
+	  		            	])
+	  		        }))
+	  		    },	
+	  	}
+	  		    
+	  	var ContributorCreatedView = {
+	  			oninit: function(){
+	  				Petition.createdByContribu = []
+	  			},
+	  		    view: function() {
+	  		        return m(".user-list", Petition.createdByContribu.map(function(item) {
 	  		        	console.log("item ",item)
 	  		            return m("div.card", [
 	  		            	m("a.user-list-item", {href:"/vote/"+item.properties.namep, oncreate: m.route.link
@@ -349,6 +380,7 @@
 	  		        return m("form.form-group", {
 	  		                onsubmit: function(e) {
 	  		                	Petition.loadfromcontributor()
+	  		                	Petition.loadcreatedcontributor()
 	  		  		        	m.redraw(true) // force
 	  		                }
 	  		            }, [
@@ -414,7 +446,7 @@
 	  		    	return m("main", [
 
 					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
-						  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  m("a", {class: "navbar-brand", href:"/list/", oncreate: m.route.link}, "TinyPet"),
 						  	m("ul", {class: "navbar-nav"}, [
 							  	m("li", {class: "nav-item active"}, m("a.nav-link", {onclick: function(){
 									m.route.set('/list');
@@ -455,7 +487,7 @@
 	  		    view: function() {
 	  		    	return m("main", [
 					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
-					  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  m("a", {class: "navbar-brand", href:"/list/", oncreate: m.route.link}, "TinyPet"),
 						  	m("ul", {class: "nav navbar-nav"}, [
 							  	m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
 									m.route.set('/list');
@@ -488,6 +520,7 @@
 		                m.route.set('/list')
 	  				} else {
 		  				Petition.load(vnode.attrs.id)
+						Petition.current.namep = vnode.attrs.id
 		  				Contributor.current.namep = vnode.attrs.id
 	  				}
 	  				
@@ -495,7 +528,7 @@
 	  		    view: function() {
 	  		    	return m("main", [
 					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
-					  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  m("a", {class: "navbar-brand", href:"/list/", oncreate: m.route.link}, "TinyPet"),
 						  	m("ul", {class: "nav navbar-nav"}, [
 							  	m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
 									m.route.set('/list');
@@ -526,7 +559,7 @@
 	  		    view: function() {
 	  		    	return m("main", [
 					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
-					  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  m("a", {class: "navbar-brand", href:"/list/", oncreate: m.route.link}, "TinyPet"),
 						  	m("ul", {class: "nav navbar-nav"}, [
 							  	m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
 									m.route.set('/list');
@@ -554,9 +587,8 @@
 	  	var PetitionFromContribPageSearch = {
 	  		    view: function() {
 	  		    	return m("main", [
-
 					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
-					  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  m("a", {class: "navbar-brand", href:"/list/", oncreate: m.route.link}, "TinyPet"),
 						  	m("ul", {class: "nav navbar-nav"}, [
 							  	m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
 									m.route.set('/list');
@@ -576,7 +608,10 @@
 									}}, "Se déconnecter"))
 							])
 						]),
+						m("h1", "Pétitions signées : "),
 	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
+						m("h1", "Pétitions créées : "),
+	  		            m("div", {id: "box"}, m(ContributorCreatedView)),
 	  		            m("div", {id: "form"}, m(FormPetitionContrib)),
 	  		        ])
 	  		    }
@@ -586,11 +621,12 @@
 	  			oninit: function(vnode) {
 	  				Contributor.current.email = vnode.attrs.id
 	                Petition.loadfromcontributor()
+	                Petition.loadcreatedcontributor()
 	  			},
 	  		    view: function() {
 	  		    	return m("main", [
 					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
-					  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  m("a", {class: "navbar-brand", href:"/list/", oncreate: m.route.link}, "TinyPet"),
 						  	m("ul", {class: "nav navbar-nav"}, [
 							  	m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
 									m.route.set('/list');
@@ -610,7 +646,10 @@
 									}}, "Se déconnecter")),
 							])
 						]),
+						m("h1", "Pétitions signées : "),
 	  		            m("div", {id: "box"}, m(ContributorPetitionView)),
+						m("h1", "Pétitions créées : "),	  		            
+						m("div", {id: "box"}, m(ContributorCreatedView)),
 	  		        ])
 	  		    }
 	  		}
@@ -624,7 +663,7 @@
 	  		    view: function() {
 	  		    	return m("main", [
 					  m("nav", {class: "navbar navbar-expand-lg navbar-light bg-light"}, [
-					  m("a", {class: "navbar-brand"}, "TinyPet"),
+						  m("a", {class: "navbar-brand", href:"/list/", oncreate: m.route.link}, "TinyPet"),
 						  	m("ul", {class: "nav navbar-nav"}, [
 							  	m("li", {class: "nav-item"}, m("a.nav-link", {onclick: function(){
 									m.route.set('/list');

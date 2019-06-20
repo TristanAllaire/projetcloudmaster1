@@ -176,4 +176,13 @@ public class PetitionEndpoint {
 		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
 		return result;
 	}
+	
+	@ApiMethod(name = "createdByContributor")
+	public List<Entity> createdByContributor(@Named("email") String email) {		
+		Query q = new Query("Petition").setFilter(new FilterPredicate("email", FilterOperator.EQUAL, email));
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		PreparedQuery pq = datastore.prepare(q);
+		List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
+		return result;
+	}
 }
