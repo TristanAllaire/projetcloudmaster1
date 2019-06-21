@@ -15,8 +15,8 @@ Commande pour deployer sur appengine
 
 *Screenshot datastore*
 
-![contributorthenpetition](src/img/contributorthenpetition.png)
+![contributorthenpetition](src/img/contributorthenpetition.PNG)
 
-![petition](src/img/petition.png)
+![petition](src/img/petition.PNG)
 
-![petitionthencontributor](src/img/petitionthencontributor.png)
+![petitionthencontributor](src/img/petitionthencontributor.PNG)
