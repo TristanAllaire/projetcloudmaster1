@@ -378,6 +378,9 @@
 	  	}
 	  	
 	  	var FormPetitionContrib = {
+  				oninit: function(){
+  					Contributor.current.email = ""	
+  				},
 	  			view: function() {
 	  		        return m("form.form-group", {
 	  		                onsubmit: function(e) {
