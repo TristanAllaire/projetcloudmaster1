@@ -15,8 +15,5 @@ Commande pour deployer sur appengine
 
 *Screenshot datastore*
 
-![contributorthenpetition](/src/img/contributorthenpetition.png)
+![Capture d'écran des entités sur le datastore](https://drive.google.com/drive/folders/192y3026GdcoCULWXM37Rc2mPzVEAGK6j?usp=sharing)
 
-![petition](/src/img/petition.png)
-
-![petitionthencontributor](/src/img/petitionthencontributor.png)
